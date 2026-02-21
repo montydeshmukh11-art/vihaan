@@ -1,26 +1,69 @@
 @import "tailwindcss";
 
+/* ===== Tell Tailwind v4 to use class-based dark mode ===== */
+@custom-variant dark (&:is(.dark *));
+
+/* ===== Tailwind v4 Theme ===== */
+@theme {
+  --color-primary:#9D36F7;
+  --color-background-light: #f8f6f7;
+  --color-background-dark: #221019;
+  --color-secondary-accent: #FF0088;
+
+  --font-family-display: "Plus Jakarta Sans", sans-serif;
+
+  --radius: 1rem;
+  --radius-lg: 2rem;
+  --radius-xl: 3rem;
+  --radius-full: 9999px;
+}
+
+/* ===== Color Scheme ===== */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: dark;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html.light {
+  color-scheme: light;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
+}
+
+/* ===== Custom Keyframes ===== */
+@keyframes marquee {
+  0% {
+    transform: translateX(100%);
+  }
+
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+@utility animate-marquee {
+  display: inline-block;
+  white-space: nowrap;
+  animation: marquee 20s linear infinite;
+}
+
+@utility bg-grid-pattern {
+  background-image:
+    linear-gradient(rgba(238, 43, 140, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(238, 43, 140, 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* ===== Glass Panel (regular class so it doesn't interfere with sticky) ===== */
+/* .glass-panel {
+  background: rgba(238, 43, 140, 0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(22px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+} */
+
+.light .glass-panel {
+  background: rgba(238, 43, 140, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.08);
 }
