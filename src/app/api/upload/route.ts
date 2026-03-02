@@ -10,6 +10,20 @@ export async function POST(req: Request) {
 
         if (!file) return NextResponse.json({ error: "No file" }, { status: 400 });
 
+        // Check upload limit — max 4 submissions per person
+        const UPLOAD_LIMIT = 4;
+        const existing = await db.collection('submissions')
+            .where('uploaderName', '==', uploaderName)
+            .get();
+
+        if (existing.size >= UPLOAD_LIMIT) {
+            return NextResponse.json(
+                { error: `Upload limit reached. You can only submit ${UPLOAD_LIMIT} photos.` },
+                { status: 429 }
+            );
+        }
+
+
         // 1. Convert File to Buffer
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
@@ -41,15 +55,13 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Cloudinary upload incomplete" }, { status: 500 });
         }
 
-        // Save Record to Firebase Firestore
-        // This acts as your "Pending Queue"
         await db.collection('submissions').add({
             cloudyId: cloudyId,
             url: secureUrl,
             category: category,
             uploaderName: uploaderName,
             fileName: file.name,
-            status: 'pending', // IMPORTANT: Admin will change this later
+            status: 'pending',
             createdAt: new Date().toISOString(),
         });
 

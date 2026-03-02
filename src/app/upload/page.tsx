@@ -7,16 +7,16 @@ import Footer from '../components/footer/footer';
 const categories = [
     { name: 'Dance', icon: 'settings_accessibility', color: 'from-blue-500 to-indigo-600' },
     { name: 'Music', icon: 'music_note', color: 'from-pink-500 to-rose-600' },
-    { name: 'Race', icon: 'directions_run', color: 'from-orange-500 to-red-600' },
+    // { name: 'Race', icon: 'directions_run', color: 'from-orange-500 to-red-600' },
     { name: 'Debate', icon: 'record_voice_over', color: 'from-yellow-500 to-amber-600' },
-    { name: 'Badminton', icon: 'sports_tennis', color: 'from-cyan-500 to-teal-600' },
+    // { name: 'Badminton', icon: 'sports_tennis', color: 'from-cyan-500 to-teal-600' },
     { name: 'Cricket', icon: 'sports_cricket', color: 'from-green-500 to-emerald-600' },
-    { name: 'Fashion Show', icon: 'checkroom', color: 'from-fuchsia-500 to-pink-600' },
-    { name: 'Hackathon', icon: 'terminal', color: 'from-violet-500 to-purple-600' },
-    { name: 'Art', icon: 'palette', color: 'from-amber-500 to-yellow-600' },
-    { name: 'Poetry', icon: 'edit_note', color: 'from-rose-500 to-pink-600' },
-    { name: 'Drama', icon: 'theater_comedy', color: 'from-indigo-500 to-blue-600' },
-    { name: 'Quiz', icon: 'quiz', color: 'from-teal-500 to-cyan-600' },
+    // { name: 'Fashion Show', icon: 'checkroom', color: 'from-fuchsia-500 to-pink-600' },
+    // { name: 'Hackathon', icon: 'terminal', color: 'from-violet-500 to-purple-600' },
+    // { name: 'Art', icon: 'palette', color: 'from-amber-500 to-yellow-600' },
+    // { name: 'Poetry', icon: 'edit_note', color: 'from-rose-500 to-pink-600' },
+    // { name: 'Drama', icon: 'theater_comedy', color: 'from-indigo-500 to-blue-600' },
+    // { name: 'Quiz', icon: 'quiz', color: 'from-teal-500 to-cyan-600' },
 ];
 
 export default function UploadPage() {
@@ -26,13 +26,21 @@ export default function UploadPage() {
     const [name, setName] = useState('');
     const [dragOver, setDragOver] = useState(false);
     const [submitted, setSubmitted] = useState(false);
-    const [isUploading, setIsUploading] = useState(false); // New: Loading state
+    const [isUploading, setIsUploading] = useState(false);
     const [step, setStep] = useState<1 | 2>(1);
 
     const handleFiles = (newFiles: FileList | null) => {
         if (!newFiles) return;
-        const imageFiles = Array.from(newFiles).filter((f) => f.type.startsWith('image/'));
-        setFiles((prev) => [...prev, ...imageFiles]);
+        const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+        const all = Array.from(newFiles).filter(f => f.type.startsWith('image/'));
+        const valid = all.filter(f => f.size <= MAX_SIZE);
+        const rejected = all.filter(f => f.size > MAX_SIZE);
+
+        if (rejected.length > 0) {
+            alert(`${rejected.length} file(s) exceed the 10MB limit and were skipped:\n${rejected.map(f => `• ${f.name}`).join('\n')}`);
+        }
+
+        setFiles(prev => [...prev, ...valid]);
     };
 
     const removeFile = (idx: number) => {
@@ -46,7 +54,6 @@ export default function UploadPage() {
         setIsUploading(true);
 
         try {
-            // Loop through files and upload to your backend one by one
             for (const file of files) {
                 const formData = new FormData();
                 formData.append('file', file);
@@ -59,19 +66,19 @@ export default function UploadPage() {
                 });
 
                 if (!response.ok) {
-                    throw new Error('Failed to upload some files');
+                    const data = await response.json();
+                    throw new Error(data.error || 'Failed to upload some files');
                 }
             }
             setSubmitted(true);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Upload failed:", error);
-            alert("Upload failed. Please try again.");
+            alert(error.message ?? "Upload failed. Please try again.");
         } finally {
             setIsUploading(false);
         }
     };
 
-    // ───── Success Screen ─────
     if (submitted) {
         return (
             <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen flex flex-col items-center justify-center px-4 register-page">
@@ -115,7 +122,7 @@ export default function UploadPage() {
     return (
         <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen register-page">
             {/* Top Bar */}
-            <Nav/>
+            <Nav />
             <div className="sticky z-40 ">
                 <div className="max-w-3xl mx-auto flex items-center justify-between px-4 h-16">
                     <Link href="/" className="flex items-center gap-2">
@@ -157,8 +164,8 @@ export default function UploadPage() {
                                         setStep(2);
                                     }}
                                     className={`group relative rounded-2xl p-5 text-left border transition-all duration-200 active:scale-95 ${selectedCategory === cat.name
-                                            ? 'border-primary/60 bg-primary/5 ring-2 ring-primary/20'
-                                            : 'border-slate-200 dark:border-white/8 hover:border-primary/30 bg-white/50 dark:bg-white/3 hover:bg-primary/5'
+                                        ? 'border-primary/60 bg-primary/5 ring-2 ring-primary/20'
+                                        : 'border-slate-200 dark:border-white/8 hover:border-primary/30 bg-white/50 dark:bg-white/3 hover:bg-primary/5'
                                         }`}
                                 >
                                     <div className={`h-11 w-11 rounded-xl bg-linear-to-br ${cat.color} flex items-center justify-center shadow-md mb-3`}>
@@ -222,8 +229,8 @@ export default function UploadPage() {
                                 onDrop={(e) => { e.preventDefault(); setDragOver(false); !isUploading && handleFiles(e.dataTransfer.files); }}
                                 onClick={() => !isUploading && fileInputRef.current?.click()}
                                 className={`relative border-2 border-dashed rounded-2xl p-10 text-center transition-all duration-200 ${isUploading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${dragOver
-                                        ? 'border-primary bg-primary/5 scale-[1.01]'
-                                        : 'border-slate-200 dark:border-white/10 hover:border-primary/40 hover:bg-primary/3'
+                                    ? 'border-primary bg-primary/5 scale-[1.01]'
+                                    : 'border-slate-200 dark:border-white/10 hover:border-primary/40 hover:bg-primary/3'
                                     }`}
                             >
                                 <input
@@ -307,8 +314,8 @@ export default function UploadPage() {
                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                     </svg>
                                 )}
-                                {isUploading 
-                                    ? `Uploading ${files.length} Photos...` 
+                                {isUploading
+                                    ? `Uploading ${files.length} Photos...`
                                     : `Submit ${files.length} Photo${files.length > 1 ? 's' : ''} for Review`
                                 }
                             </button>
@@ -316,7 +323,7 @@ export default function UploadPage() {
                     </div>
                 )}
             </main>
-            <Footer/>
+            <Footer />
         </div>
     );
 }

@@ -1,7 +1,6 @@
 "use client";
 import { signIn } from "next-auth/react";
 import Nav from "@/app/components/nav/nav";
-import Footer from "@/app/components/footer/footer";
 
 export default function SignInPage() {
   return (
