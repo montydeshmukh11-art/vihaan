@@ -1,19 +1,46 @@
-import { cloudinary, db } from '@/lib/server-configs';
+import { db } from '@/lib/server-configs';
 import { NextResponse } from 'next/server';
+import { headers } from 'next/headers';
 
+const UPLOAD_LIMIT = 4;
+
+// Helper to get client IP from Vercel headers
+async function getClientIp(): Promise<string> {
+    const h = await headers();
+    return h.get('x-forwarded-for')?.split(',')[0]?.trim()
+        || h.get('x-real-ip')
+        || 'unknown';
+}
+
+// GET — pre-check if this IP can still upload
+export async function GET() {
+    try {
+        const ip = await getClientIp();
+        const existing = await db.collection('submissions')
+            .where('uploaderIp', '==', ip)
+            .get();
+
+        const remaining = Math.max(0, UPLOAD_LIMIT - existing.size);
+        return NextResponse.json({ remaining, limit: UPLOAD_LIMIT });
+    } catch (error: any) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+}
+
+// POST — save metadata after direct Cloudinary upload
 export async function POST(req: Request) {
     try {
-        const formData = await req.formData();
-        const file = formData.get('file') as File;
-        const category = formData.get('category') as string;
-        const uploaderName = formData.get('uploaderName') as string;
+        const { url, cloudyId, category, uploaderName, fileName } = await req.json();
 
-        if (!file) return NextResponse.json({ error: "No file" }, { status: 400 });
+        if (!url || !cloudyId) {
+            return NextResponse.json({ error: "Missing upload data" }, { status: 400 });
+        }
 
-        // Check upload limit — max 4 submissions per person
-        const UPLOAD_LIMIT = 4;
+        const ip = await getClientIp();
+
+        // Check upload limit by IP
         const existing = await db.collection('submissions')
-            .where('uploaderName', '==', uploaderName)
+            .where('uploaderIp', '==', ip)
             .get();
 
         if (existing.size >= UPLOAD_LIMIT) {
@@ -23,49 +50,18 @@ export async function POST(req: Request) {
             );
         }
 
-
-        // 1. Convert File to Buffer
-        const bytes = await file.arrayBuffer();
-        const buffer = Buffer.from(bytes);
-
-        // 2. Upload to Cloudinary
-        const cloudinaryRes = await new Promise<any>((resolve, reject) => {
-            const uploadStream = cloudinary.uploader.upload_stream(
-                {
-                    folder: "submission",
-                    public_id: `${category}_${Date.now()}_${file.name.split('.')[0]}`,
-                    resource_type: "auto",
-                },
-                (error, result) => {
-                    if (error) {
-                        console.error("Cloudinary Stream Error:", error);
-                        return reject(error);
-                    } else {
-                        resolve(result);
-                    }
-                }
-            )
-            uploadStream.end(buffer)
-        })
-
-        const cloudyId = cloudinaryRes?.public_id
-        const secureUrl = cloudinaryRes?.secure_url
-
-        if (!secureUrl) {
-            return NextResponse.json({ error: "Cloudinary upload incomplete" }, { status: 500 });
-        }
-
         await db.collection('submissions').add({
-            cloudyId: cloudyId,
-            url: secureUrl,
-            category: category,
-            uploaderName: uploaderName,
-            fileName: file.name,
+            cloudyId,
+            url,
+            category,
+            uploaderName,
+            fileName,
+            uploaderIp: ip,
             status: 'pending',
             createdAt: new Date().toISOString(),
         });
 
-        return NextResponse.json({ success: true, cloudyId, url: secureUrl });
+        return NextResponse.json({ success: true, cloudyId, url });
 
     } catch (error: any) {
         console.error("Upload Error:", error);

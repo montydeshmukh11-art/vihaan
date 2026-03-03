@@ -19,6 +19,10 @@ const categories = [
     // { name: 'Quiz', icon: 'quiz', color: 'from-teal-500 to-cyan-600' },
 ];
 
+// Cloudinary direct upload config (not secrets — safe for client)
+const CLOUDINARY_CLOUD_NAME = 'danc85c3y';
+const CLOUDINARY_UPLOAD_PRESET = 'vihanEventUpload';
+
 export default function UploadPage() {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -54,20 +58,56 @@ export default function UploadPage() {
         setIsUploading(true);
 
         try {
-            for (const file of files) {
-                const formData = new FormData();
-                formData.append('file', file);
-                formData.append('category', selectedCategory);
-                formData.append('uploaderName', name || 'Anonymous');
+            // Step 1: Pre-check — ask the server how many uploads this IP has left
+            const checkRes = await fetch('/api/upload');
+            const { remaining } = await checkRes.json();
 
+            if (remaining <= 0) {
+                alert('Upload limit reached. You can only submit 4 photos total.');
+                return;
+            }
+
+            // Only upload as many files as the remaining quota allows
+            const filesToUpload = files.slice(0, remaining);
+            if (filesToUpload.length < files.length) {
+                alert(`You can only upload ${remaining} more photo(s). Uploading the first ${remaining}.`);
+            }
+
+            for (const file of filesToUpload) {
+                // Step 2: Upload directly to Cloudinary from the browser
+                const cloudFormData = new FormData();
+                cloudFormData.append('file', file);
+                cloudFormData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+                cloudFormData.append('public_id', `${selectedCategory}_${Date.now()}_${file.name.split('.')[0]}`);
+
+                const cloudRes = await fetch(
+                    `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+                    { method: 'POST', body: cloudFormData }
+                );
+
+                if (!cloudRes.ok) {
+                    const err = await cloudRes.json();
+                    throw new Error(err?.error?.message || 'Cloudinary upload failed');
+                }
+
+                const cloudData = await cloudRes.json();
+
+                // Step 3: Send only metadata to your API (tiny JSON, no file)
                 const response = await fetch('/api/upload', {
                     method: 'POST',
-                    body: formData,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        url: cloudData.secure_url,
+                        cloudyId: cloudData.public_id,
+                        category: selectedCategory,
+                        uploaderName: name,
+                        fileName: file.name,
+                    }),
                 });
 
                 if (!response.ok) {
                     const data = await response.json();
-                    throw new Error(data.error || 'Failed to upload some files');
+                    throw new Error(data.error || 'Failed to save upload metadata');
                 }
             }
             setSubmitted(true);
@@ -209,10 +249,11 @@ export default function UploadPage() {
 
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="space-y-2">
-                                <label className="text-sm font-semibold text-slate-600 dark:text-slate-300 ml-1">Your Name <span className="text-slate-400 font-normal">(optional)</span></label>
+                                <label className="text-sm font-semibold text-slate-600 dark:text-slate-300 ml-1 pb-3">Your Name</label>
                                 <div className="relative group">
                                     <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">person</span>
                                     <input
+                                        required
                                         value={name}
                                         onChange={(e) => setName(e.target.value)}
                                         disabled={isUploading}

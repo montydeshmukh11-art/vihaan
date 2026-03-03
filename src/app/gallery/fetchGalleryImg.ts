@@ -7,7 +7,7 @@ export async function FetchGalleryImg(categoryName: string, lastDocId?: string) 
       .where('category', '==', categoryName)
       .where('status', '==', 'published')
       .orderBy('createdAt', 'desc')
-      .limit(5);
+      .limit(8);
 
     if (lastDocId) {
       const lastDoc = await db.collection('submissions').doc(lastDocId).get();
@@ -17,7 +17,7 @@ export async function FetchGalleryImg(categoryName: string, lastDocId?: string) 
     }
 
     const snapshot = await query.get();
-    
+
     const photos = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data(),
