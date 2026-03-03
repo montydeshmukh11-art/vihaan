@@ -248,8 +248,8 @@ export default function UploadPage() {
                         </div>
 
                         <form onSubmit={handleSubmit} className="space-y-6">
-                            <div className="space-y-2">
-                                <label className="text-sm font-semibold text-slate-600 dark:text-slate-300 ml-1 pb-3">Your Name</label>
+                            <div className="space-y-2 flex flex-col gap-1">
+                                <label className="text-sm font-semibold text-slate-600 dark:text-slate-300 ml-2">Your Name</label>
                                 <div className="relative group">
                                     <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">person</span>
                                     <input
@@ -346,7 +346,7 @@ export default function UploadPage() {
 
                             <button
                                 type="submit"
-                                disabled={files.length === 0 || isUploading}
+                                disabled={files.length === 0 || isUploading || !name}
                                 className="w-full py-4 rounded-full bg-linear-to-r from-primary to-secondary-accent text-white font-bold text-lg shadow-[0_0_30px_rgba(157,54,247,0.3)] transition-all hover:-translate-y-0.5 hover:shadow-[0_0_40px_rgba(238,43,140,0.4)] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:hover:translate-y-0 flex items-center justify-center gap-2"
                             >
                                 {isUploading && (
