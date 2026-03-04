@@ -17,7 +17,7 @@ export default function RegisterPage() {
     const [isSuccess, setIsSuccess] = useState(false);
     const [error, setError] = useState('');
 
-    // Auto-dismiss success screen after 5 seconds
+    
     useEffect(() => {
         if (isSuccess) {
             const timer = setTimeout(() => {
@@ -65,21 +65,21 @@ export default function RegisterPage() {
 
             <div className="relative bg-white/10 dark:bg-white/5 backdrop-blur-xl border border-white/20 rounded-3xl p-10 md:p-14 max-w-md w-[90%] text-center shadow-[0_0_60px_rgba(157,54,247,0.2)] animate-[scaleIn_0.4s_ease-out]">
                 {/* Animated checkmark circle */}
-                <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center shadow-[0_0_40px_rgba(52,211,153,0.4)] animate-[bounceIn_0.5s_ease-out]">
+                <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-linear-to-br from-green-400 to-emerald-500 flex items-center justify-center shadow-[0_0_40px_rgba(52,211,153,0.4)] animate-[bounceIn_0.5s_ease-out]">
                     <svg className="w-12 h-12 text-white animate-[drawCheck_0.5s_ease-out_0.3s_both]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                 </div>
 
-                <h2 className="text-3xl font-black mb-3 bg-gradient-to-r from-white via-primary to-secondary-accent bg-clip-text text-transparent">
+                <h2 className="text-3xl font-black mb-3 bg-linear-to-r from-white via-primary to-secondary-accent bg-clip-text text-transparent">
                     Registration Successful!
                 </h2>
-                <p className="text-slate-300 mb-2 text-lg">🎉 Welcome aboard, <span className="font-bold text-white">{formData.name}</span>!</p>
+                <p className="text-slate-300 mb-2 text-lg">Welcome<span className="font-bold text-white">{formData.name}</span>!</p>
                 <p className="text-slate-400 text-sm mb-8">You&apos;re registered for <span className="font-semibold text-primary">{formData.event}</span></p>
 
                 {/* Countdown progress bar */}
                 <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-primary to-secondary-accent rounded-full animate-[shrink_5s_linear_forwards]" />
+                    <div className="h-full bg-linear-to-r from-primary to-secondary-accent rounded-full animate-[shrink_5s_linear_forwards]" />
                 </div>
                 <p className="text-slate-500 text-xs mt-3">Auto-closing in a moment...</p>
             </div>

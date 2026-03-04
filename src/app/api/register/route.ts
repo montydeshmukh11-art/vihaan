@@ -1,5 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import { appendToSheet } from "@/lib/sheet";
+import sendConfirmationEmail from "@/lib/mailer";
 
 
 export async function POST(req: NextRequest) {
@@ -12,7 +13,7 @@ export async function POST(req: NextRequest) {
 
         await appendToSheet({ name, email, enrollment, phone, department, event, teamMembers });
 
-        // await sendConfirmationEmail(name, email, enrollment, phone, department, event, teamMembers);
+        await sendConfirmationEmail({name, email, enrollment, phone, department, event, teamMembers});
 
         return NextResponse.json({ message: "Registration successful" }, { status: 200 });
     } catch (error: any) {
