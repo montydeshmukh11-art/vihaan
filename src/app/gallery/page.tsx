@@ -7,8 +7,10 @@ export default async function Gallery() {
   // Fetch initial data for each category on the server — no useEffect, no loading state
   const [danceResult, musicResult, sportResult] = await Promise.all([
     FetchGalleryImg('Dance'),
-    FetchGalleryImg('Music'),
-    FetchGalleryImg('Sports')
+    FetchGalleryImg('Song'),
+    FetchGalleryImg('Sports'),
+    // FetchGalleryImg('Technical'),
+    // FetchGalleryImg('Fashion')
   ])
 
   return (
@@ -20,7 +22,7 @@ export default async function Gallery() {
         <section className="w-full px-3 sm:px-4 md:px-10 py-6 sm:py-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0 mb-5 sm:mb-6">
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-              Vihaan <span className="text-primary">2025</span> Highlights
+              Vihaan <span className="text-primary">2026</span> Highlights
             </h1>
           </div>
           <div className="relative w-full rounded-2xl overflow-hidden group shadow-2xl shadow-primary/10">
@@ -66,9 +68,9 @@ export default async function Gallery() {
           title="Sports"
           cardbg="bg-white dark:bg-slate-700"
           accentColor="bg-slate-800 dark:bg-slate-200"
-          category="Music"
-          initialPhotos={musicResult.photos}
-          initialLastId={musicResult.lastId}
+          category="Sports"
+          initialPhotos={sportResult.photos}
+          initialLastId={sportResult.lastId}
         />
         {/* <section className="w-full p-4 sm:p-6 bg-white dark:bg-slate-700">
           <div className="flex items-center gap-3 mb-4 sm:mb-6 pr-4 sm:pr-10">
@@ -103,9 +105,9 @@ export default async function Gallery() {
         {/* Music & Debate Section — client component for load-more interactivity */}
         <GallerySection
          cardbg="transparent"
-          title="Music & Debate Corner"
+          title="Singing"
           accentColor="bg-slate-800 dark:bg-slate-200"
-          category="Music"
+          category="Singing"
           initialPhotos={musicResult.photos}
           initialLastId={musicResult.lastId}
         />

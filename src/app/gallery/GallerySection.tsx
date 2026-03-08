@@ -60,7 +60,7 @@ export default function GallerySection({ title, accentColor, category, initialPh
                             className="relative rounded-2xl overflow-hidden group cursor-pointer shadow-md hover:shadow-xl transition-all duration-300"
                         >
                             <div
-                                className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                                className="absolute inset-0 bg-cover bg-top transition-transform duration-500 group-hover:scale-110"
                                 style={{ backgroundImage: `url('${photo.thumbnailUrl}')` }}
                             />
                             <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent opacity-80 group-hover:opacity-100 transition-opacity" />

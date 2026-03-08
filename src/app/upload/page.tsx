@@ -11,7 +11,7 @@ const categories = [
     { name: 'Technical', icon: 'developer_mode_tv', color: 'from-yellow-500 to-amber-600' },
     // { name: 'Badminton', icon: 'sports_tennis', color: 'from-cyan-500 to-teal-600' },
     { name: 'Sports', icon: 'sports_cricket', color: 'from-green-500 to-emerald-600' },
-    { name: 'Fashion Show', icon: 'checkroom', color: 'from-fuchsia-500 to-pink-600' },
+    { name: 'Fashion', icon: 'checkroom', color: 'from-fuchsia-500 to-pink-600' },
     // { name: 'Hackathon', icon: 'terminal', color: 'from-violet-500 to-purple-600' },
     // { name: 'Art', icon: 'palette', color: 'from-amber-500 to-yellow-600' },
     // { name: 'Poetry', icon: 'edit_note', color: 'from-rose-500 to-pink-600' },
@@ -60,10 +60,10 @@ export default function UploadPage() {
         try {
             // Step 1: Pre-check — ask the server how many uploads this IP has left
             const checkRes = await fetch('/api/upload');
-            const { remaining } = await checkRes.json();
+            const { remaining, limit } = await checkRes.json();
 
             if (remaining <= 0) {
-                alert('Upload limit reached. You can only submit 4 photos total.');
+                alert(`Upload limit reached. You can only submit ${limit} photos total.`);
                 return;
             }
 

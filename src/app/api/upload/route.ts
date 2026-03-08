@@ -1,8 +1,10 @@
 import { db } from '@/lib/server-configs';
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
+import { getServerSession } from 'next-auth';
+import { authOptions } from "@/app/api/auth/[...nextauth]/route"
 
-const UPLOAD_LIMIT = 4;
+
 
 // Helper to get client IP from Vercel headers
 async function getClientIp(): Promise<string> {
@@ -15,6 +17,10 @@ async function getClientIp(): Promise<string> {
 // GET — pre-check if this IP can still upload
 export async function GET() {
     try {
+        const session = await getServerSession(authOptions);
+
+        const isAdmin = session?.user?.email === process.env.ADMIN_EMAIL;
+        const UPLOAD_LIMIT = isAdmin ? 200 : 4;
         const ip = await getClientIp();
         const existing = await db.collection('submissions')
             .where('uploaderIp', '==', ip)
@@ -30,6 +36,10 @@ export async function GET() {
 // POST — save metadata after direct Cloudinary upload
 export async function POST(req: Request) {
     try {
+        const session = await getServerSession(authOptions);
+
+        const isAdmin = session?.user?.email === process.env.ADMIN_EMAIL;
+        const UPLOAD_LIMIT = isAdmin ? 200 : 4;
         const { url, cloudyId, category, uploaderName, fileName } = await req.json();
 
         if (!url || !cloudyId) {

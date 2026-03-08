@@ -73,6 +73,9 @@ export default function Nav() {
                   <MenuLink href="/admin" icon="shield_person" label="Admin Panel" color="text-violet-500" />
                 </div>
               </div>
+              <div className={`${menuOpen ? "flex" : "hidden"} w-dvw h-dvh z-40 absolute -right-4 top-14`}
+              onClick={() => setMenuOpen(!menuOpen)}
+              ></div>
             </button>
           </div>
         </div>
