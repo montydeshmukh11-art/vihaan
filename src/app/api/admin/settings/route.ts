@@ -11,8 +11,8 @@ export async function GET(){
         const doc = await SETTINGS_DOC.get()
         const data = doc.data()
         return NextResponse.json({
-            registrstionEnabled: data?.registrstionEnabled?? true,
-            uploadEnabled: data?.uploadEnbled?? true,
+            registrationEnabled: data?.registrationEnabled?? true,
+            uploadEnabled: data?.uploadEnabled?? true,
             uploadLimitPerUser: data?.uploadLimitPerUser?? 4
         })
     } catch (error:any) {
@@ -29,8 +29,8 @@ export async function POST(req: Request){
         }
         const body = await req.json()
         const updates:any = {}
-        if(typeof body.registrstionEnabled ==='boolean'){
-            updates.registrstionEnabled = body.registrstionEnabled
+        if(typeof body.registrationEnabled ==='boolean'){
+            updates.registrationEnabled = body.registrationEnabled
         }
         if(typeof body.uploadEnabled ==='boolean'){
             updates.uploadEnabled = body.uploadEnabled
@@ -38,7 +38,7 @@ export async function POST(req: Request){
         if(typeof body.uploadLimitPerUser ==='number'){
             updates.uploadLimitPerUser = body.uploadLimitPerUser
         }
-        await SETTINGS_DOC.update(updates, {merge: true})
+        await SETTINGS_DOC.set(updates, {merge: true})
         return NextResponse.json({success: true, ...updates})
     } catch (error:any) {
         console.error("Error updating settings:", error)
