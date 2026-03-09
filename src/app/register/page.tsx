@@ -17,8 +17,21 @@ export default function RegisterPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [error, setError] = useState('');
-    const [isToggle, setIsToggle] = useState(true)
+    const [isToggle, setIsToggle] = useState(false)
+    const [settingsLoaded , setSettingsLoaded] = useState(false)
 
+
+    useEffect(() => {
+        fetch('/api/admin/settings/')
+        .then(res => res.json())
+        .then(data => {
+            setIsToggle(!data.registrationEnabled)
+            setSettingsLoaded(true)
+        })
+
+        .catch(() =>
+        setSettingsLoaded(true))
+    },[])
 
     useEffect(() => {
         if (isSuccess) {

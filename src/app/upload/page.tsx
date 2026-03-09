@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Nav from '../components/nav/nav';
 import Footer from '../components/footer/footer';
@@ -32,6 +32,16 @@ export default function UploadPage() {
     const [submitted, setSubmitted] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [step, setStep] = useState<1 | 2>(1);
+    const [uploadEnabled, setUploadEnabled] = useState(true)
+
+    useEffect(() => {
+        fetch('/api/admin/settings')
+            .then(res => res.json())
+            .then(data =>
+                setUploadEnabled(data.uploadEnabled)
+            )
+            .catch(() => { })
+    }, [])
 
     const handleFiles = (newFiles: FileList | null) => {
         if (!newFiles) return;
@@ -119,6 +129,7 @@ export default function UploadPage() {
         }
     };
 
+
     if (submitted) {
         return (
             <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen flex flex-col items-center justify-center px-4 register-page">
@@ -160,9 +171,19 @@ export default function UploadPage() {
     }
 
     return (
+
         <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen register-page">
             {/* Top Bar */}
             <Nav />
+            {!uploadEnabled ? (
+                <div className="fixed inset-0 z-50 flex items-center justify-center ...">
+                    <div>
+                        <h2>Uploads are currently paused</h2>
+                        <Link href="/">Back Home</Link>
+                    </div>
+                </div>
+            ) : (
+            <>
             <div className="sticky ">
                 <div className="max-w-3xl mx-auto flex items-center justify-between h-16 ml-1/2">
                     <Link href="/" className="flex items-center gap-2">
@@ -364,7 +385,10 @@ export default function UploadPage() {
                     </div>
                 )}
             </main>
+            </>
+            )}
             <Footer />
         </div>
     );
+
 }

@@ -1,12 +1,19 @@
 import { NextResponse, NextRequest } from "next/server";
 import { appendToSheet } from "@/lib/sheet";
 import sendConfirmationEmail from "@/lib/mailer";
-impoer
+import { db } from "@/lib/server-configs";
+import { error } from "console";
 
 
 export async function POST(req: NextRequest) {
     try {
-        const settingDoc = await db.
+        // check if upload is disabled
+        const settingDoc = await db.collection('config').doc('siteSettings').get()
+        const settings = settingDoc?.data()
+        if(settings?.registrationEnabled === false){
+            return NextResponse.json({error: "Registration is currently closed."}, {status: 403})
+        }
+
         const { name, email, enrollment, phone, department, event, teamMembers } = await req.json();
 
         if (!name || !email || !enrollment || !phone || !department || !event || !teamMembers) {

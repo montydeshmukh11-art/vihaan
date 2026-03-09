@@ -26,6 +26,31 @@ export default function AdminPage() {
     const [lastId, setLastId] = useState<string | null>(null);
     const [hasMore, setHasMore] = useState(false);
     const [bulkApproving, setBulkApproving] = useState(false);
+    const [settings, setSettings] = useState({
+        registrationEnabled: true,
+        uploadEnabled: true,
+        uploadLimitPerUser: 4
+    })
+
+    useEffect(() => {
+        fetch('/api/admin/settings')
+            .then(res => res.json())
+            .then(data =>
+                setSettings(data)
+            )
+
+    }, [])
+
+    const updateSettings = async (key: string, value: any) => {
+        setSettings(prev => ({ ...prev, [key]: value }))
+        await fetch('/api/admin/settings',
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ [key]: value }),
+            })
+
+    }
 
     const loadPhotos = useCallback(async (reset = true) => {
         setLoading(true)
@@ -128,6 +153,35 @@ export default function AdminPage() {
             </div>
 
             <main className="max-w-7xl mx-auto px-4 py-8">
+                {/* settings */}
+                <div className="glass-card rounded-xl p-6 mb-8 space-y-4">
+                    <h3 className="font-bold text-lg">Site Settings</h3>
+
+                    <div className="flex items-center justify-between">
+                        <span>Registration Open</span>
+                        <button onClick={() => updateSettings('registrationEnabled', !settings.registrationEnabled)}>
+                            {settings.registrationEnabled ? '✅ ON' : '❌ OFF'}
+                        </button>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                        <span>Uploads Open</span>
+                        <button onClick={() => updateSettings('uploadEnabled', !settings.uploadEnabled)}>
+                            {settings.uploadEnabled ? '✅ ON' : '❌ OFF'}
+                        </button>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                        <span>Upload Limit Per User</span>
+                        <input
+                            type="number"
+                            value={settings.uploadLimitPerUser}
+                            onChange={(e) => updateSettings('uploadLimitPerUser', parseInt(e.target.value) || 4)}
+                            className="w-20 bg-slate-100 dark:bg-white/10 rounded-lg px-3 py-2 text-center"
+                        />
+                    </div>
+                </div>
+
                 {/* Stats Row */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
                     <div className="glass-card rounded-xl p-4 text-center">
